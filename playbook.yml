@@ -1,0 +1,30 @@
+---
+- hosts: app_servers
+  become: yes
+  tasks:
+    - name: Update DNF packages
+      dnf:
+        update_cache: yes
+
+    - name: Install Docker
+      dnf:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Install K3s (Lightweight Kubernetes)
+      shell: |
+        curl -sfL https://get.k3s.io | sh -
+      args:
+        creates: /usr/local/bin/k3s
